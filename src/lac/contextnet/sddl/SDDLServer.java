@@ -6,6 +6,7 @@ import java.io.InputStreamReader;
 import java.io.Serializable;
 import java.util.UUID;
 
+import br.pucrio.acanhota.autosddl.commons.VehicleStatus;
 import lac.cnclib.sddl.message.ApplicationMessage;
 import lac.cnclib.sddl.serialization.Serialization;
 import lac.cnet.sddl.objects.ApplicationObject;
@@ -15,8 +16,6 @@ import lac.cnet.sddl.udi.core.SddlLayer;
 import lac.cnet.sddl.udi.core.UniversalDDSLayerFactory;
 import lac.cnet.sddl.udi.core.UniversalDDSLayerFactory.SupportedDDSVendors;
 import lac.cnet.sddl.udi.core.listener.UDIDataReaderListener;
-
-import com.infopae.model.PingObject;
 
 public class SDDLServer implements UDIDataReaderListener<ApplicationObject> {
 	
@@ -111,8 +110,8 @@ public class SDDLServer implements UDIDataReaderListener<ApplicationObject> {
 	 * @param rawData
 	 */
 	private void treatDataReceival(Message msg, Serializable rawData) {
-		if(rawData instanceof PingObject) {
-			PingObject ping = (PingObject) rawData;
+		if(rawData instanceof VehicleStatus) {
+			VehicleStatus ping = (VehicleStatus) rawData;
 			
 			System.out.print(ping.toString());
 			
