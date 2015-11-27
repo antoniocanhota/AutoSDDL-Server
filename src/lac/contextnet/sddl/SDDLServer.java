@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Serializable;
+import java.util.Date;
 import java.util.UUID;
 
 import br.pucrio.acanhota.autosddl.commons.VehicleStatus;
@@ -113,7 +114,7 @@ public class SDDLServer implements UDIDataReaderListener<ApplicationObject> {
 		if(rawData instanceof VehicleStatus) {
 			VehicleStatus ping = (VehicleStatus) rawData;
 			
-			System.out.print(ping.toString());
+			System.out.println(new Date() + " - " + ping.toString());
 			
 			ping.changeState();
 
