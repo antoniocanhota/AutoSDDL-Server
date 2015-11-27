@@ -7,7 +7,7 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.UUID;
 
-import br.pucrio.acanhota.autosddl.commons.VehicleStatus;
+import br.pucrio.acanhota.autosddl.commons.VehicleMessage;
 import lac.cnclib.sddl.message.ApplicationMessage;
 import lac.cnclib.sddl.serialization.Serialization;
 import lac.cnet.sddl.objects.ApplicationObject;
@@ -111,8 +111,8 @@ public class SDDLServer implements UDIDataReaderListener<ApplicationObject> {
 	 * @param rawData
 	 */
 	private void treatDataReceival(Message msg, Serializable rawData) {
-		if(rawData instanceof VehicleStatus) {
-			VehicleStatus ping = (VehicleStatus) rawData;
+		if(rawData instanceof VehicleMessage) {
+			VehicleMessage ping = (VehicleMessage) rawData;
 			
 			System.out.println(new Date() + " - " + ping.toString());
 			
