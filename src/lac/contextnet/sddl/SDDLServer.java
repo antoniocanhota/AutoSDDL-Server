@@ -1,7 +1,6 @@
 package lac.contextnet.sddl;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Serializable;
@@ -16,8 +15,6 @@ import lac.cnet.sddl.udi.core.SddlLayer;
 import lac.cnet.sddl.udi.core.UniversalDDSLayerFactory;
 import lac.cnet.sddl.udi.core.UniversalDDSLayerFactory.SupportedDDSVendors;
 import lac.cnet.sddl.udi.core.listener.UDIDataReaderListener;
-
-import org.ini4j.Ini;
 
 import com.infopae.model.PingObject;
 
@@ -38,10 +35,9 @@ public class SDDLServer implements UDIDataReaderListener<ApplicationObject> {
 	public SDDLServer () 
 	{
 		System.out.println("SDDLServer: starting...");
-		
-		/*read configuration file*/
-		System.out.println("SDDLServer: reading configuration file...");
-		readConfigurationFile();
+				
+		System.out.println("SDDLServer: setting OpenSplice as supportedDDSVendor...");
+		supportedDDSVendor = SupportedDDSVendors.OpenSplice;
 		
 	    /*create the SDDL layer with a Subscriber listener*/
 		System.out.println("SDDLServer: initializing DDS and SDDL...");
@@ -136,40 +132,5 @@ public class SDDLServer implements UDIDataReaderListener<ApplicationObject> {
 			System.out.println("\nMensagem: " + (String) rawData);
 			System.out.print("Escreva a mensagem: ");		
 		}
-	}
-
-	private void readConfigurationFile () {
-
-		/*reading the configuration file (config.ini)*/
-        try {	    
-		    String vendor;
-		
-            File iniFile = new File("config.ini");
-            Ini ini = new Ini(iniFile);
-
-            /*check for the sddl vendor*/
-            vendor = ini.get("sddllayer", "sddl_vendor");
-            if (vendor == null)
-                    throw new Exception("Missing 'sddl_vendor' from [sddllayer].");
-
-            if (!vendor.equals("CoreDX")
-            && !vendor.equals("RTI")
-            && !vendor.equals("OpenSplice"))
-                    throw new Exception("Unsupported sddl vendor: "+vendor+", choose between 'CoreDX', 'RTI' or 'OpenSplice'.");
-
-            if (vendor.equals("CoreDX"))
-                    supportedDDSVendor = SupportedDDSVendors.CoreDX;
-            else if (vendor.equals("RTI"))
-                    supportedDDSVendor = SupportedDDSVendors.RTI;
-            else if (vendor.equals("OpenSplice"))
-                    supportedDDSVendor = SupportedDDSVendors.OpenSplice;
-                
-        } catch (IOException e) {
-            System.out.println("Unable to read file 'config.ini', it exists?");
-            System.exit(1);
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-            System.exit(1);
-        }
 	}
 }
