@@ -112,14 +112,14 @@ public class SDDLServer implements UDIDataReaderListener<ApplicationObject> {
 	 */
 	private void treatDataReceival(Message msg, Serializable rawData) {
 		if(rawData instanceof VehicleMessage) {
-			VehicleMessage ping = (VehicleMessage) rawData;
+			VehicleMessage vehicleMessage = (VehicleMessage) rawData;
 			
-			System.out.println(new Date() + " - " + ping.toString());
+			System.out.println(new Date() + " - " + vehicleMessage.toString());
 			
-			ping.changeState();
+			vehicleMessage.changeState();
 
 			ApplicationMessage appMsg = new ApplicationMessage();
-			appMsg.setContentObject(ping);
+			appMsg.setContentObject(vehicleMessage);
 			
 			PrivateMessage privateMessage = new PrivateMessage();
 			privateMessage.setGatewayId(gatewayId);
