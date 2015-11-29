@@ -1,5 +1,7 @@
 package br.pucrio.acanhota.autosddl.server;
 
+import java.util.ArrayList;
+
 import com.espertech.esper.client.Configuration;
 import com.espertech.esper.client.EPAdministrator;
 import com.espertech.esper.client.EPRuntime;
@@ -9,10 +11,20 @@ import com.espertech.esper.client.EPStatement;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.UpdateListener;
 
+import br.pucrio.acanhota.autosddl.commons.Subscriber;
 import br.pucrio.acanhota.autosddl.commons.VehicleMessage;
+import lac.cnclib.sddl.message.ApplicationMessage;
+import lac.cnclib.sddl.serialization.Serialization;
+import lac.cnet.sddl.objects.PrivateMessage;
+import lac.cnet.sddl.udi.core.SddlLayer;
 
-public class EsperProcessor {
+public abstract class EsperProcessor {
 	protected	EPRuntime  cepRT;
+	
+    /*The SDDL Layer : DDS Abstraction */
+    protected static SddlLayer sddlLayer;
+    
+    protected ArrayList<Subscriber> subscribers = new ArrayList<Subscriber>();
 
 	protected void startEsperProcessor() {
 		Configuration cepConfig = new Configuration();
@@ -29,11 +41,28 @@ public class EsperProcessor {
 		cepStatement.addListener(new CEPListener());
 	}
 	
-	private static class CEPListener implements UpdateListener {
+	public class CEPListener implements UpdateListener {
+		
+		@Override
 		public void update(EventBean[] newData, EventBean[] oldData) {
-			System.out.println("VEHICLE CRASH: " + newData[0].getUnderlying());
-			System.out.println("@TODO: Sending messages to vehicle subscribers");
+			VehicleMessage vehicleMessage = (VehicleMessage) newData[0].getUnderlying();
+			
+			String crashMessage = "Possible vehicle crash at " + vehicleMessage.getCreatedAtAsStr() + " on " + vehicleMessage.getCoordinatesAsStr() + ".";			
+			ApplicationMessage appMes = new ApplicationMessage();
+			appMes.setContentObject(crashMessage);
+			
+			System.out.println("IMPORTANT!" + crashMessage);
+			
+			for (Subscriber subscriber : subscribers) {
+				if (subscriber.getLicensePlate() == vehicleMessage.getLicensePlate()) {
+					PrivateMessage message = new PrivateMessage();				
+					message.setMessage(Serialization.toProtocolMessage(appMes));
+					message.setNodeId(subscriber.getUuid());
+					
+					sddlLayer.writeTopic(PrivateMessage.class.getSimpleName(), message);
+				}
+			}
 		}
+		
 	}
-	
 }
