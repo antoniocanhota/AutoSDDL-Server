@@ -8,6 +8,7 @@ import java.util.Date;
 import java.util.UUID;
 
 import br.pucrio.acanhota.autosddl.commons.VehicleMessage;
+import br.pucrio.acanhota.autosddl.server.EsperProcessor;
 import lac.cnclib.sddl.message.ApplicationMessage;
 import lac.cnclib.sddl.serialization.Serialization;
 import lac.cnet.sddl.objects.ApplicationObject;
@@ -18,7 +19,7 @@ import lac.cnet.sddl.udi.core.UniversalDDSLayerFactory;
 import lac.cnet.sddl.udi.core.UniversalDDSLayerFactory.SupportedDDSVendors;
 import lac.cnet.sddl.udi.core.listener.UDIDataReaderListener;
 
-public class SDDLServer implements UDIDataReaderListener<ApplicationObject> {
+public class SDDLServer extends EsperProcessor implements UDIDataReaderListener<ApplicationObject> {
 	
 	/* The SDDL vendor supported */
     private SupportedDDSVendors supportedDDSVendor;
@@ -38,6 +39,9 @@ public class SDDLServer implements UDIDataReaderListener<ApplicationObject> {
 				
 		System.out.println("SDDLServer: setting OpenSplice as supportedDDSVendor...");
 		supportedDDSVendor = SupportedDDSVendors.OpenSplice;
+		
+		System.out.println("SDDLServer: initializing Esper...");
+		startEsperProcessor();
 		
 	    /*create the SDDL layer with a Subscriber listener*/
 		System.out.println("SDDLServer: initializing DDS and SDDL...");
@@ -115,6 +119,7 @@ public class SDDLServer implements UDIDataReaderListener<ApplicationObject> {
 			VehicleMessage vehicleMessage = (VehicleMessage) rawData;
 			
 			System.out.println(new Date() + " - " + vehicleMessage.toString());
+			cepRT.sendEvent(vehicleMessage);
 			
 			vehicleMessage.changeState();
 
