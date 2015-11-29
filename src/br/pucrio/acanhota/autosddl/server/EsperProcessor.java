@@ -16,7 +16,7 @@ public class EsperProcessor {
 
 	protected void startEsperProcessor() {
 		Configuration cepConfig = new Configuration();
-		cepConfig.addEventType("VehicleStatus",VehicleMessage.class.getName());
+		cepConfig.addEventType("VehicleMessage",VehicleMessage.class.getName());
 		EPServiceProvider cep = EPServiceProviderManager.getProvider("myCEPEngine",cepConfig);
 		this.cepRT = cep.getEPRuntime();
 		
@@ -24,8 +24,8 @@ public class EsperProcessor {
 		EPAdministrator cepAdm = cep.getEPAdministrator();
 		//TODO: Mudar essa regra!!!
 		EPStatement cepStatement = cepAdm.createEPL("select * from " +
-		"VehicleStatus().win:length(1) " +
-		"having accelerometer > 1.2");
+		"VehicleMessage().win:length(2) " +
+		"having vehicleAcceleration < -4");
 		cepStatement.addListener(new CEPListener());
 	}
 	
