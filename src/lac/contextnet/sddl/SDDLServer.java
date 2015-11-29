@@ -9,12 +9,12 @@ import java.util.UUID;
 
 import br.pucrio.acanhota.autosddl.commons.VehicleMessage;
 import br.pucrio.acanhota.autosddl.server.EsperProcessor;
+import br.pucrio.acanhota.autosddl.server.Vehicle;
 import lac.cnclib.sddl.message.ApplicationMessage;
 import lac.cnclib.sddl.serialization.Serialization;
 import lac.cnet.sddl.objects.ApplicationObject;
 import lac.cnet.sddl.objects.Message;
 import lac.cnet.sddl.objects.PrivateMessage;
-import lac.cnet.sddl.udi.core.SddlLayer;
 import lac.cnet.sddl.udi.core.UniversalDDSLayerFactory;
 import lac.cnet.sddl.udi.core.UniversalDDSLayerFactory.SupportedDDSVendors;
 import lac.cnet.sddl.udi.core.listener.UDIDataReaderListener;
@@ -24,11 +24,8 @@ public class SDDLServer extends EsperProcessor implements UDIDataReaderListener<
 	/* The SDDL vendor supported */
     private SupportedDDSVendors supportedDDSVendor;
 
-    /*The SDDL Layer : DDS Abstraction */
-    private static SddlLayer sddlLayer;
     
-    /* Gateway ID */
-	private static UUID gatewayId;
+
 	
 	/* Mobile node ID */
 	private static UUID nodeId;
@@ -118,9 +115,16 @@ public class SDDLServer extends EsperProcessor implements UDIDataReaderListener<
 		if(rawData instanceof VehicleMessage) {
 			VehicleMessage vehicleMessage = (VehicleMessage) rawData;
 			
+			Vehicle vehicle = vehicleDb.getVehicle(vehicleMessage.getLicensePlate());
+			if (vehicle == null) {
+				/* Add new vehicle */
+				Vehicle newVehicle = new Vehicle(vehicleMessage.getLicensePlate(), "Started connection at " + vehicleMessage.getCreatedAtAsStr() + " on " + vehicleMessage.getCoordinatesAsStr());
+				vehicleDb.insert(newVehicle);
+			}
+			
 			System.out.println(new Date() + " - " + vehicleMessage.toString());
 			cepRT.sendEvent(vehicleMessage);
-			
+			/*
 			vehicleMessage.changeState();
 
 			ApplicationMessage appMsg = new ApplicationMessage();
@@ -132,10 +136,51 @@ public class SDDLServer extends EsperProcessor implements UDIDataReaderListener<
 			privateMessage.setMessage(Serialization.toProtocolMessage(appMsg));
 
 			sddlLayer.writeTopic(PrivateMessage.class.getSimpleName(), privateMessage);
+			*/
 		}
+		/*
+		if(rawData instanceof Subscriber) {
+			//msg.getRecipientId();
+			Subscriber subscriber = (Subscriber) rawData;
+			
+			System.out.println(new Date() + " - Received subscriber " + subscriber.toString());
+			
+			subscribers.add(subscriber);
+			System.out.println("Subscribers updated: " + subscribers);
+			
+			ApplicationMessage appMsg = new ApplicationMessage();
+			appMsg.setContentObject(subscriber);
+			
+			PrivateMessage privateMessage = new PrivateMessage();
+			privateMessage.setGatewayId(gatewayId);
+			privateMessage.setNodeId(nodeId);
+			privateMessage.setMessage(Serialization.toProtocolMessage(appMsg));
+
+			sddlLayer.writeTopic(PrivateMessage.class.getSimpleName(), privateMessage);
+		}
+		*/
 		if (rawData instanceof String) {
-			System.out.println("\nMensagem: " + (String) rawData);
-			System.out.print("Escreva a mensagem: ");		
-		}
+			
+			
+			String licensePlate = (String) rawData;
+			
+			System.out.println(new Date() + " - getting update from " + licensePlate);
+			
+			ApplicationMessage appMsg = new ApplicationMessage();
+			
+			Vehicle vehicle = vehicleDb.getVehicle(licensePlate);
+			if (vehicle == null) {
+				appMsg.setContentObject("Vehicle not found!");
+			} else {
+				appMsg.setContentObject(vehicle.getStatus());
+			}
+									
+			PrivateMessage privateMessage = new PrivateMessage();
+			privateMessage.setGatewayId(gatewayId);
+			privateMessage.setNodeId(nodeId);
+			privateMessage.setMessage(Serialization.toProtocolMessage(appMsg));
+
+			sddlLayer.writeTopic(PrivateMessage.class.getSimpleName(), privateMessage);			
+		}		
 	}
 }
