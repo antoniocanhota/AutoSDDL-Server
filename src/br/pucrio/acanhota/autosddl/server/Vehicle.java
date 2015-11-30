@@ -25,4 +25,8 @@ public class Vehicle {
 	public void setStatus(String status) {
 		this.status = status;
 	}
+	
+	public String toString() {
+		return "[licensePlate = " + licensePlate + "]";
+	}
 }

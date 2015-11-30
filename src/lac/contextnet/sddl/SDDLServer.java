@@ -15,6 +15,7 @@ import lac.cnclib.sddl.serialization.Serialization;
 import lac.cnet.sddl.objects.ApplicationObject;
 import lac.cnet.sddl.objects.Message;
 import lac.cnet.sddl.objects.PrivateMessage;
+import lac.cnet.sddl.udi.core.SddlLayer;
 import lac.cnet.sddl.udi.core.UniversalDDSLayerFactory;
 import lac.cnet.sddl.udi.core.UniversalDDSLayerFactory.SupportedDDSVendors;
 import lac.cnet.sddl.udi.core.listener.UDIDataReaderListener;
@@ -24,8 +25,11 @@ public class SDDLServer extends EsperProcessor implements UDIDataReaderListener<
 	/* The SDDL vendor supported */
     private SupportedDDSVendors supportedDDSVendor;
 
+    /*The SDDL Layer : DDS Abstraction */
+    protected static SddlLayer sddlLayer;
     
-
+    /* Gateway ID */
+	public static UUID gatewayId;
 	
 	/* Mobile node ID */
 	private static UUID nodeId;
@@ -50,6 +54,7 @@ public class SDDLServer extends EsperProcessor implements UDIDataReaderListener<
 	    Object sendTopic = sddlLayer.createTopic(PrivateMessage.class, PrivateMessage.class.getSimpleName());
 	    sddlLayer.createDataReader(this, receiveTopic);
 	    sddlLayer.createDataWriter(sendTopic);
+	    System.out.println("SDDLServer: initialized!");
 	}
 		
 	public static void main(String[] args) {
@@ -118,53 +123,15 @@ public class SDDLServer extends EsperProcessor implements UDIDataReaderListener<
 			Vehicle vehicle = vehicleDb.getVehicle(vehicleMessage.getLicensePlate());
 			if (vehicle == null) {
 				/* Add new vehicle */
-				Vehicle newVehicle = new Vehicle(vehicleMessage.getLicensePlate(), "Started connection at " + vehicleMessage.getCreatedAtAsStr() + " on " + vehicleMessage.getCoordinatesAsStr());
+				Vehicle newVehicle = new Vehicle(vehicleMessage.getLicensePlate(), "No alerts");
 				vehicleDb.insert(newVehicle);
 			}
 			
-			System.out.println(new Date() + " - " + vehicleMessage.toString());
+			System.out.println(new Date() + ": " + vehicleMessage.toString());
 			cepRT.sendEvent(vehicleMessage);
-			/*
-			vehicleMessage.changeState();
-
-			ApplicationMessage appMsg = new ApplicationMessage();
-			appMsg.setContentObject(vehicleMessage);
-			
-			PrivateMessage privateMessage = new PrivateMessage();
-			privateMessage.setGatewayId(gatewayId);
-			privateMessage.setNodeId(nodeId);
-			privateMessage.setMessage(Serialization.toProtocolMessage(appMsg));
-
-			sddlLayer.writeTopic(PrivateMessage.class.getSimpleName(), privateMessage);
-			*/
 		}
-		/*
-		if(rawData instanceof Subscriber) {
-			//msg.getRecipientId();
-			Subscriber subscriber = (Subscriber) rawData;
-			
-			System.out.println(new Date() + " - Received subscriber " + subscriber.toString());
-			
-			subscribers.add(subscriber);
-			System.out.println("Subscribers updated: " + subscribers);
-			
-			ApplicationMessage appMsg = new ApplicationMessage();
-			appMsg.setContentObject(subscriber);
-			
-			PrivateMessage privateMessage = new PrivateMessage();
-			privateMessage.setGatewayId(gatewayId);
-			privateMessage.setNodeId(nodeId);
-			privateMessage.setMessage(Serialization.toProtocolMessage(appMsg));
-
-			sddlLayer.writeTopic(PrivateMessage.class.getSimpleName(), privateMessage);
-		}
-		*/
 		if (rawData instanceof String) {
-			
-			
 			String licensePlate = (String) rawData;
-			
-			System.out.println(new Date() + " - getting update from " + licensePlate);
 			
 			ApplicationMessage appMsg = new ApplicationMessage();
 			

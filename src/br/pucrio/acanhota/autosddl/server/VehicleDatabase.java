@@ -1,6 +1,7 @@
 package br.pucrio.acanhota.autosddl.server;
 
 import java.util.ArrayList;
+import java.util.Date;
 
 public class VehicleDatabase {
 
@@ -10,12 +11,10 @@ public class VehicleDatabase {
 		vehicles = new ArrayList<Vehicle>();
 	}
 	
-	public Vehicle getVehicle(String licensePlate) {
-		System.out.println("finding vehicle");
+	public Vehicle getVehicle(String licensePlate) {		
 		Vehicle vehicleFound = null;
 		for (Vehicle vehicle : vehicles) {
-			if (vehicle.getLicensePlate().equals(licensePlate)){
-				System.out.println("vehcile found");
+			if (vehicle.getLicensePlate().equals(licensePlate)){				
 				vehicleFound = vehicle;
 			}
 		}
@@ -23,7 +22,7 @@ public class VehicleDatabase {
 	}
 
 	public void insert(Vehicle newVehicle) {
-		System.out.println("Adding vehcile");
+		System.out.println((new Date()) + ": Added vehicle " + newVehicle);
 		vehicles.add(newVehicle);
 	}
 	
